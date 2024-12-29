@@ -6,6 +6,7 @@
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/DiskIo.h>
 #include <Protocol/BlockIo.h>
+#include <Guid/FileInfo.h>
 
 struct MemoryMap {
   UINTN buffer_size;
@@ -17,7 +18,7 @@ struct MemoryMap {
 };
 
 EFI_STATUS GetMemoryMap(struct MemoryMap* map) {
-  if (map->buffer == NULL ) {
+  if (map->buffer == NULL) {
     return EFI_BUFFER_TOO_SMALL;
   }
 
