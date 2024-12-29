@@ -121,6 +121,7 @@ EFI_STATUS EFIAPI UefiMain(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *system_tab
   SaveMemoryMap(&memmap, memmap_file);
   memmap_file->Close(memmap_file);
 
+  // read kernel.elf
   EFI_FILE_PROTOCOL* kernel_file;
   root_dir->Open(
     root_dir, &kernel_file, L"\\kernel.elf",
@@ -146,6 +147,7 @@ EFI_STATUS EFIAPI UefiMain(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *system_tab
   kernel_file->Read(kernel_file, &kernel_file_size, (VOID*)kernel_base_addr);
   Print(L"Kernel: 0x%0lx (%lu bytes)\n", kernel_base_addr, kernel_file_size);
 
+  // exit boot service
   EFI_STATUS status;
   status = gBS->ExitBootServices(image_handle, memmap.map_key);
   if (EFI_ERROR(status)) {
@@ -160,6 +162,13 @@ EFI_STATUS EFIAPI UefiMain(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *system_tab
       while (1);
     }
   }
+
+  // call kernel
+  UINT64 entry_addr = *(UINT64*)(kernel_base_addr + 24);
+
+  typedef void EntryPointType(void);
+  EntryPointType* entry_point = (EntryPointType*)entry_addr;
+  entry_point();
 
   Print(L"ALL DONE\n");
 
